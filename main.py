@@ -29,20 +29,29 @@ def recommend_ui():
 @app.route('/recommend_books', methods=['post'])
 def recommend():
     user_input = request.form.get('user_input')
-    index = np.where(pt.index == user_input)[0][0]
-    similar_items = sorted(list(enumerate(similarity_scores[index])), key=lambda x: x[1], reverse=True)[1:5]
 
-    data = []
-    for i in similar_items:
-        item = []
-        temp_df = books[books['Book-Title'] == pt.index[i[0]]]
-        item.extend(temp_df.drop_duplicates('Book-Title')['Book-Title'].values.tolist())
-        item.extend(temp_df.drop_duplicates('Book-Title')['Book-Author'].values.tolist())
-        item.extend(temp_df.drop_duplicates('Book-Title')['Image-URL-M'].values.tolist())
+    if (books["Book-Title"] == user_input).sum() > 0:
+        index = np.where(pt.index == user_input)[0][0]
+        similar_items = sorted(list(enumerate(similarity_scores[index])), key=lambda x: x[1], reverse=True)[1:5]
 
-        data.append(item)
+        data = []
+        for i in similar_items:
+            item = []
+            temp_df = books[books['Book-Title'] == pt.index[i[0]]]
+            item.extend(temp_df.drop_duplicates('Book-Title')['Book-Title'].values.tolist())
+            item.extend(temp_df.drop_duplicates('Book-Title')['Book-Author'].values.tolist())
+            item.extend(temp_df.drop_duplicates('Book-Title')['Image-URL-M'].values.tolist())
 
+            data.append(item)
+
+    else:
+        data = None
     return render_template('recommend.html', data=data)
+
+
+@app.route('/contact')
+def contact():
+    return render_template("contact.html")
 
 
 if __name__ == '__main__':
